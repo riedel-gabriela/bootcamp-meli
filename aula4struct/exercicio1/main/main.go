@@ -38,7 +38,7 @@ var products = []Product{
 	{ID: 2, Name: "Smartphone", Price: 800.00, Description: "Latest model smartphone", Category: "Electronics"},
 }
 
-func (p *Product) GetAll() {
+func (p Product) GetAll() {
 	fmt.Println("Products:")
 	for _, product := range products {
 		fmt.Printf("ID: %d, Name: %s, Price: %.2f, Description: %s, Category: %s\n", product.ID, product.Name, product.Price, product.Description, product.Category)
@@ -50,7 +50,7 @@ func (p *Product) Save() {
 	fmt.Printf("Product %s saved successfully!\n", p.Name)
 }
 
-func (p *Product) GetByID(id int) (Product, error) {
+func (p Product) GetByID(id int) (Product, error) {
 	for _, product := range products {
 		if product.ID == id {
 			return product, nil

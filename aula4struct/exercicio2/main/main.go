@@ -28,6 +28,6 @@ type Employee struct {
 	Person
 }
 
-func (e *Employee) PrintEmployee() string {
+func (e Employee) PrintEmployee() string {
 	return "ID: " + fmt.Sprint(e.ID) + ", Name: " + e.Name + ", Position: " + e.Position + ", Date of Birth: " + e.DateOfBirth
 }
