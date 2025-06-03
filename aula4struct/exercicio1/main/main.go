@@ -45,8 +45,8 @@ func (p Product) GetAll() {
 	}
 }
 
-func (p *Product) Save() {
-	products = append(products, *p)
+func (p Product) Save() {
+	products = append(products, p)
 	fmt.Printf("Product %s saved successfully!\n", p.Name)
 }
 
