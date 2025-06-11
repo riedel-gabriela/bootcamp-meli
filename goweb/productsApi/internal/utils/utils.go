@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/aula10get/internal/domain"
+	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/domain"
 )
 
 // Valida o formato da data no padrão DD/MM/YYYY

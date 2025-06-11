@@ -1,8 +1,8 @@
 package product
 
 import (
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/aula10get/internal/domain"
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/aula10get/internal/utils"
+	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/domain"
+	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/utils"
 )
 
 // a interface define os métodos que o serviço de produto deve implementar
