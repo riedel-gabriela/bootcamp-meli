@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -16,6 +17,8 @@ type ProductHandler interface {
 	GetByParam(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
+	Patch(w http.ResponseWriter, r *http.Request)
+	Delete(w http.ResponseWriter, r *http.Request)
 }
 
 type productHandler struct {
@@ -73,69 +76,110 @@ func (h *productHandler) GetByParam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var newProduct domain.Product
+	var newProduct domain.RequestProduct
 	if err := json.NewDecoder(r.Body).Decode(&newProduct); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("Invalid request body: %v", err), http.StatusBadRequest)
 		return
 	}
 
+	err := validate.Struct(newProduct)
+	if err != nil {
+		HandleValidationErrors(w, err)
+		return
+	}
 	createdProduct, err := h.service.Create(newProduct)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error creating product: %v", err), http.StatusInternalServerError)
+		return
+	}
+	fmt.Printf("Product created: %+v\n", createdProduct)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(createdProduct)
+}
+
+func (h *productHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	productID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	var productToUpdate domain.UpdateProductRequest
+	if err := json.NewDecoder(r.Body).Decode(&productToUpdate); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	productToUpdate.ID = productID
+	err = validate.Struct(productToUpdate)
+	if err != nil {
+		HandleValidationErrors(w, err)
+		return
+	}
+
+	product, err := h.service.Update(productID, productToUpdate)
+	if err != nil {
+		if err.Error() == "repository: product with ID "+id+" not found" {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(product)
+}
+
+func (h *productHandler) Patch(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	productID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	var productToPatch domain.PatchProductRequest
+	if err := json.NewDecoder(r.Body).Decode(&productToPatch); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	productToPatch.ID = productID
+	err = validate.Struct(productToPatch)
+	if err != nil {
+		HandleValidationErrors(w, err)
+		return
+	}
+
+	product, err := h.service.Patch(productID, productToPatch)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(createdProduct)
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(product)
 }
 
-// func (h *productHandler) Update(w http.ResponseWriter, r *http.Request) {
-// 	id := chi.URLParam(r, "id")
-// 	productID, err := strconv.ParseInt(id, 10, 64)
-// 	if err != nil {
-// 		http.Error(w, "Invalid product ID", http.StatusBadRequest)
-// 		return
-// 	}
+func (h *productHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	productID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
 
-// 	var updatedProduct domain.Product
-// 	if err := json.NewDecoder(r.Body).Decode(&updatedProduct); err != nil {
-// 		http.Error(w, "Invalid request body", http.StatusBadRequest)
-// 		return
-// 	}
-
-// 	product, err := h.service.Update(productID, updatedProduct)
-// 	if err != nil {
-// 		http.Error(w, err.Error(), http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(http.StatusOK)
-// 	json.NewEncoder(w).Encode(product)
-// }
-
-// func (h *productHandler) Patch(w http.ResponseWriter, r *http.Request) {
-//     id := chi.URLParam(r, "id")
-//     productID, err := strconv.ParseInt(id, 10, 64)
-//     if err != nil {
-//         http.Error(w, "Invalid product ID", http.StatusBadRequest)
-//         return
-//     }
-
-//     var productToPatch := domain.Product
-//     if err := json.NewDecoder(r.Body).Decode(&patchProduct); err != nil {
-//         http.Error(w, "Invalid request body", http.StatusBadRequest)
-//         return
-//     }
-
-//     product, err := h.service.Patch(productID, patchProduct)
-//     if err != nil {
-//         http.Error(w, err.Error(), http.StatusInternalServerError)
-//         return
-//     }
-
-//     w.Header().Set("Content-Type", "application/json")
-//     w.WriteHeader(http.StatusOK)
-//     json.NewEncoder(w).Encode(product)
-// }
+	err = h.service.Delete(productID)
+	if err != nil {
+		if err.Error() == "repository: product with ID "+id+" not found" {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

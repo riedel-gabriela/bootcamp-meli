@@ -10,9 +10,10 @@ type ProductService interface {
 	GetAll() (map[int64]domain.Product, error)
 	GetByID(id int64) (domain.Product, error)
 	GetByParam(priceGt float64) ([]domain.Product, error)
-	Create(product domain.Product) (domain.Product, error)
-	Update(id int64, product domain.Product) (domain.Product, error)
-	Patch(id int64, product domain.Product) (domain.Product, error)
+	Create(product domain.RequestProduct) (domain.Product, error)
+	Update(id int64, product domain.UpdateProductRequest) (domain.Product, error)
+	Patch(id int64, product domain.PatchProductRequest) (domain.Product, error)
+	Delete(id int64) error
 }
 
 // uma classe productService implementa a interface ProductService
@@ -29,7 +30,7 @@ func NewProductService(repository ProductRepository) ProductService {
 func (s *productService) GetAll() (map[int64]domain.Product, error) {
 	products, err := s.repository.GetAll()
 	if err != nil {
-		return nil, err
+		return nil, utils.ErrNoProductsFound
 	}
 	return products, nil
 }
@@ -37,7 +38,7 @@ func (s *productService) GetAll() (map[int64]domain.Product, error) {
 func (s *productService) GetByID(id int64) (domain.Product, error) {
 	product, err := s.repository.GetByID(id)
 	if err != nil {
-		return domain.Product{}, err
+		return domain.Product{}, utils.ErrProductNotFound
 	}
 	return product, nil
 }
@@ -45,17 +46,18 @@ func (s *productService) GetByID(id int64) (domain.Product, error) {
 func (s *productService) GetByParam(priceGt float64) ([]domain.Product, error) {
 	products, err := s.repository.GetByParam(priceGt)
 	if err != nil {
-		return nil, err
+		return nil, utils.ErrNoProductsFound
 	}
 	return products, nil
 }
 
-func (s *productService) Create(product domain.Product) (domain.Product, error) {
+func (s *productService) Create(product domain.RequestProduct) (domain.Product, error) {
 	products, err := s.repository.GetAll()
 	if err != nil {
-		return domain.Product{}, err
+		return domain.Product{}, utils.ErrNoProductsFound
 	}
 	newProduct := domain.Product{
+		ID:          utils.GenerateUniqueID(products),
 		Name:        product.Name,
 		Quantity:    product.Quantity,
 		CodeValue:   product.CodeValue,
@@ -63,44 +65,67 @@ func (s *productService) Create(product domain.Product) (domain.Product, error) 
 		Expiration:  product.Expiration,
 		Price:       product.Price,
 	}
-	if err := utils.ValidateProduct(&newProduct, products, false); err != nil {
-		return domain.Product{}, err
-	}
-	newProduct.ID = utils.GenerateUniqueID(products)
-	product, err = s.repository.Create(newProduct)
+	createdProduct, err := s.repository.Create(newProduct)
 	if err != nil {
-		return domain.Product{}, err
+		return domain.Product{}, utils.ErrProductNotCreated
 	}
-	return product, nil
+	return createdProduct, nil
 }
 
-func (s *productService) Update(id int64, product domain.Product) (domain.Product, error) {
-	products, err := s.repository.GetAll()
+func (s *productService) Update(id int64, product domain.UpdateProductRequest) (domain.Product, error) {
+	existing, err := s.repository.GetByID(id)
 	if err != nil {
 		return domain.Product{}, err
 	}
-	if err := utils.ValidateProduct(&product, products, true); err != nil {
-		return domain.Product{}, err
-	}
-	product.ID = id
-	updatedProduct, err := s.repository.Update(id, product)
+	existing.Name = *product.Name
+	existing.Quantity = *product.Quantity
+	existing.CodeValue = *product.CodeValue
+	existing.IsPublished = *product.IsPublished
+	existing.Expiration = *product.Expiration
+	existing.Price = *product.Price
+
+	updatedProduct, err := s.repository.Update(id, existing)
 	if err != nil {
-		return domain.Product{}, err
+		return domain.Product{}, utils.ErrProductNotUpdated
 	}
 	return updatedProduct, nil
 }
 
-func (s *productService) Patch(id int64, product domain.Product) (domain.Product, error) {
-	products, err := s.repository.GetAll()
+func (s *productService) Patch(id int64, product domain.PatchProductRequest) (domain.Product, error) {
+	productToPatch, err := s.repository.GetByID(id)
 	if err != nil {
-		return domain.Product{}, err
+		return domain.Product{}, utils.ErrProductNotFound
 	}
-	if err := utils.ValidateProduct(&product, products, true); err != nil {
-		return domain.Product{}, err
+
+	switch {
+	case product.Name != nil:
+		productToPatch.Name = *product.Name
+	case product.Quantity != nil:
+		productToPatch.Quantity = *product.Quantity
+	case product.CodeValue != nil:
+		productToPatch.CodeValue = *product.CodeValue
+	case product.IsPublished != nil:
+		productToPatch.IsPublished = *product.IsPublished
+	case product.Expiration != nil:
+		productToPatch.Expiration = *product.Expiration
+	case product.Price != nil:
+		productToPatch.Price = *product.Price
+	default:
+		return domain.Product{}, utils.ErrNoFieldsToUpdate
+
 	}
-	updatedProduct, err := s.repository.Patch(id, product)
+
+	updatedProduct, err := s.repository.Update(id, productToPatch)
 	if err != nil {
-		return domain.Product{}, err
+		return domain.Product{}, utils.ErrProductNotPatched
 	}
 	return updatedProduct, nil
+}
+
+func (s *productService) Delete(id int64) error {
+	err := s.repository.Delete(id)
+	if err != nil {
+		return utils.ErrProductNotDeleted
+	}
+	return nil
 }
