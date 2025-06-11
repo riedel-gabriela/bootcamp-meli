@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/aula10get/cmd/http/handler"
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/aula10get/internal/product"
+	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/cmd/http/handler"
+	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/product"
 )
 
 func BuildProductRoutes() http.Handler {

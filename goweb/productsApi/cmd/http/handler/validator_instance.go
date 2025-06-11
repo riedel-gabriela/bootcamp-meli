@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/go-playground/validator/v10"
-	customvalidator "github.com/riedel-gabriela/bootcamp-meli/goweb/aula10get/internal/utils"
+	customvalidator "github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/utils"
 )
 
 // Global validator instance

@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/aula10get/cmd/http/router"
+	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/cmd/http/router"
 )
 
 func main() {
@@ -12,5 +12,3 @@ func main() {
 		panic(err)
 	}
 }
-
-//TODO implementar getid, get by param, e post.
