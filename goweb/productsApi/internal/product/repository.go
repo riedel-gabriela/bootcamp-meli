@@ -23,7 +23,7 @@ type productRepository struct {
 
 func LoadDatabase() (ProductRepository, error) {
 	// Lê o arquivo JSON que contém os produtos
-	file, err := os.ReadFile("goweb/aula10get/database/products.json")
+	file, err := os.ReadFile("goweb/productsApi/database/products.json")
 	// Se houver um erro ao ler o arquivo, retorna um erro formatado
 	if err != nil {
 		return nil, utils.ErrCouldntReadFile

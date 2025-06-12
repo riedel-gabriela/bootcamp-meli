@@ -20,12 +20,17 @@ func BuildProductRoutes() http.Handler {
 	productHandler := handler.NewProductHandler(service)
 
 	// Registra as rotas de produtos
-	r.Get("/products", productHandler.GetAll)
-	r.Get("/products/{id}", productHandler.GetByID)
-	r.Get("/products/search", productHandler.GetByParam)
-	r.Post("/products", productHandler.Create)
-	r.Put("/products/{id}", productHandler.Update)
-	r.Patch("/products/{id}", productHandler.Patch)
-	r.Delete("/products/{id}", productHandler.Delete)
+	r.Group(func(r chi.Router) {
+		r.Get("/products", productHandler.GetAll)
+		r.Get("/products/{id}", productHandler.GetByID)
+		r.Get("/products/search", productHandler.GetByParam)
+	})
+	r.Group(func(r chi.Router) {
+		r.Use(handler.AuthMiddleware)
+		r.Post("/products", productHandler.Create)
+		r.Put("/products/{id}", productHandler.Update)
+		r.Patch("/products/{id}", productHandler.Patch)
+		r.Delete("/products/{id}", productHandler.Delete)
+	})
 	return r
 }

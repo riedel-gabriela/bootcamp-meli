@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"encoding/json"
+	"net/http"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -25,4 +27,10 @@ func GenerateUniqueID(products map[int64]domain.Product) int64 {
 		}
 	}
 	return maxID + 1
+}
+
+func WriteJSON(w http.ResponseWriter, status int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(data)
 }

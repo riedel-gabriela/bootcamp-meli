@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/domain"
 	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/product"
+	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/utils"
 )
 
 type ProductHandler interface {
@@ -35,9 +36,7 @@ func (h *productHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(products)
+	utils.WriteJSON(w, http.StatusOK, products)
 }
 
 func (h *productHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -52,9 +51,7 @@ func (h *productHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(product)
+	utils.WriteJSON(w, http.StatusOK, product)
 }
 
 func (h *productHandler) GetByParam(w http.ResponseWriter, r *http.Request) {
@@ -70,9 +67,7 @@ func (h *productHandler) GetByParam(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(products)
+	utils.WriteJSON(w, http.StatusOK, products)
 }
 
 func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -92,10 +87,7 @@ func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Error creating product: %v", err), http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("Product created: %+v\n", createdProduct)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(createdProduct)
+	utils.WriteJSON(w, http.StatusCreated, createdProduct)
 }
 
 func (h *productHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -128,9 +120,7 @@ func (h *productHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(product)
+	utils.WriteJSON(w, http.StatusOK, product)
 }
 
 func (h *productHandler) Patch(w http.ResponseWriter, r *http.Request) {
@@ -159,9 +149,7 @@ func (h *productHandler) Patch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(product)
+	utils.WriteJSON(w, http.StatusOK, product)
 }
 
 func (h *productHandler) Delete(w http.ResponseWriter, r *http.Request) {
