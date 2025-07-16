@@ -7,9 +7,9 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/domain"
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/product"
-	"github.com/riedel-gabriela/bootcamp-meli/goweb/productsApi/internal/utils"
+	"github.com/riedel-gabriela/bootcamp-meli/gobcd/CRUD/productsApi/internal/domain"
+	"github.com/riedel-gabriela/bootcamp-meli/gobcd/CRUD/productsApi/internal/product"
+	"github.com/riedel-gabriela/bootcamp-meli/gobcd/CRUD/productsApi/internal/utils"
 )
 
 type ProductHandler interface {
