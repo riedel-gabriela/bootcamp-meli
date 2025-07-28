@@ -5,3 +5,9 @@ start:
 
 development:
 	- air -c .air.toml
+
+cover:
+	- go test ./... -cover -coverprofile=coverage.out
+
+cover-html:
+	- go tool cover -html=coverage.out -o coverage.html

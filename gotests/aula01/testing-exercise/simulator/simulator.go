@@ -7,7 +7,7 @@ type Subject struct {
 	Position *positioner.Position
 	// speed of the subject (in m/s)
 	Speed float64
-}	
+}
 
 // CatchSimulator is an interface that represents a catch simulator
 // It is used to simulate if a hunter can catch a prey

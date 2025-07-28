@@ -11,7 +11,7 @@ type SimulatorMock struct {
 }
 
 // CanCatch implements simulator.CatchSimulator.
-func (s *SimulatorMock) CanCatch(hunter *simulator.Subject, prey *simulator.Subject) (canCatch bool) {
+func (s *SimulatorMock) CanCatch(hunter, prey *simulator.Subject) (canCatch bool) {
 	args := s.Called(hunter, prey)
 	return args.Bool(0)
 }
